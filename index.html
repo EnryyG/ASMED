@@ -3,488 +3,551 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>A.S.M. EDILIZIA | Precisione Costruttiva</title>
+    <title>A.S.M. EDILIZIA | Ristrutturazioni e Innovazione</title>
+    <meta name="description" content="Impresa edile a Roma specializzata in ristrutturazioni chiavi in mano, preventivi digitali e monitoraggio cantiere via app.">
     
+    <!-- 1. CONFIGURAZIONE TAILWIND CSS (Design System) -->
     <script src="https://cdn.tailwindcss.com"></script>
-    
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;800&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
-    
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
     <script>
         tailwind.config = {
+            darkMode: 'class',
             theme: {
                 extend: {
                     colors: {
-                        'asm-blue': '#0B253C', /* Blu tecnico del logo */
-                        'asm-accent': '#38bdf8', /* Ciano elettrico per i dettagli */
+                        asm: {
+                            900: '#0B253C', // Blu Notte (Brand)
+                            800: '#0f2a42', // Pannelli
+                            400: '#38bdf8', // Ciano Elettrico (Accent)
+                            50: '#f8fafc',  // Testo Chiaro
+                        }
                     },
                     fontFamily: {
                         sans: ['Montserrat', 'sans-serif'],
                         mono: ['Space Mono', 'monospace'],
                     },
+                    backgroundImage: {
+                        'grid-pattern': "linear-gradient(to right, rgba(255,255,255,0.03) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,255,255,0.03) 1px, transparent 1px)",
+                    },
                     animation: {
-                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'float': 'float 6s ease-in-out infinite',
+                    },
+                    keyframes: {
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-20px)' },
+                        }
                     }
                 }
             }
         }
     </script>
 
+    <!-- 2. LIBRERIE ESTERNE (3D, Icone, Font) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;800&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- 3. STILI CUSTOM -->
     <style>
-        body {
-            background-color: #0B253C;
-            color: #ffffff;
-            overflow-x: hidden;
-            cursor: none; /* Nascondiamo il cursore di sistema */
-        }
-
-        /* GRID BACKGROUND - Effetto Blueprint */
-        .bg-grid {
-            background-image: 
-                linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
-                linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
-            background-size: 50px 50px;
-        }
-
-        /* --- CURSORE FIX --- */
-        .cursor-follower {
-            position: fixed;
-            top: 0; left: 0;
-            width: 20px; height: 20px;
-            background-color: white;
-            border-radius: 50%;
-            pointer-events: none; /* Fondamentale: permette di cliccare attraverso */
-            z-index: 99999;
-            mix-blend-mode: difference; /* Si vede su bianco e nero */
-            transform: translate(-50%, -50%);
-        }
-        
-        /* Stato Hover del cursore */
-        body.hovering .cursor-follower {
-            transform: translate(-50%, -50%) scale(3);
-            background-color: transparent;
-            border: 1px solid white;
-        }
-
-        /* Text Reveal */
-        .mask-text { overflow: hidden; }
-        
-        /* Chatbot Styles */
-        .chat-container {
-            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+        body { background-color: #0B253C; color: #ffffff; overflow-x: hidden; }
+        .glass {
+            background: rgba(15, 42, 66, 0.7);
             backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
         }
-        .message-enter { animation: slideIn 0.3s ease forwards; opacity: 0; transform: translateY(10px); }
-        @keyframes slideIn { to { opacity: 1; transform: translateY(0); } }
-        
+        /* Range Input Custom */
+        input[type=range] { -webkit-appearance: none; background: transparent; }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none; height: 20px; width: 20px; border-radius: 50%;
+            background: #38bdf8; margin-top: -8px; cursor: pointer; box-shadow: 0 0 10px rgba(56,189,248,0.5);
+        }
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%; height: 4px; background: #334155; border-radius: 2px;
+        }
         /* Scrollbar */
-        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar { width: 8px; }
         ::-webkit-scrollbar-track { background: #0B253C; }
-        ::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb { background: #1e405e; border-radius: 4px; }
     </style>
 </head>
-<body class="bg-grid selection:bg-asm-accent selection:text-black">
+<body class="bg-grid-pattern bg-[length:40px_40px] selection:bg-asm-400 selection:text-asm-900">
 
-    <div class="cursor-follower" id="cursor"></div>
-
-    <nav class="fixed w-full z-50 px-6 py-4 flex justify-between items-center bg-[#0B253C]/90 backdrop-blur-md border-b border-white/10 transition-all duration-300" id="navbar">
-        <div class="flex items-center gap-4">
-            <div class="w-10 h-10 bg-white flex items-end justify-center pb-1 rounded-sm">
-                <div class="flex gap-1 items-end">
-                    <div class="w-2 h-4 bg-[#0B253C]"></div>
-                    <div class="w-2 h-6 bg-[#0B253C]"></div>
-                    <div class="w-2 h-3 bg-[#0B253C]"></div>
-                </div>
+    <!-- LOADING SCREEN -->
+    <div id="loader" class="fixed inset-0 bg-asm-900 z-[100] flex items-center justify-center transition-opacity duration-500">
+        <div class="text-center">
+            <div class="text-asm-400 font-mono text-sm mb-2 animate-pulse">INITIALIZING SYSTEM...</div>
+            <div class="w-48 h-1 bg-gray-800 rounded overflow-hidden">
+                <div class="h-full bg-asm-400 w-0 transition-all duration-1000" id="load-bar"></div>
             </div>
-            <div class="flex flex-col leading-none">
-                <span class="text-xl font-bold tracking-wider">A.S.M.</span>
-                <span class="text-[0.6rem] font-mono text-asm-accent uppercase tracking-[0.3em]">Edilizia</span>
-            </div>
-        </div>
-        
-        <div class="hidden md:flex gap-8 font-mono text-xs uppercase tracking-widest text-gray-400">
-            <a href="#servizi" class="hover:text-white hover-trigger transition">Servizi</a>
-            <a href="#lavori" class="hover:text-white hover-trigger transition">Lavori</a>
-            <a href="#contatti" class="hover:text-white hover-trigger transition">Contatti</a>
-        </div>
-
-        <a href="tel:3209609181" class="hover-trigger border border-asm-accent text-asm-accent px-6 py-2 rounded-sm font-mono text-xs hover:bg-asm-accent hover:text-black transition duration-300 flex items-center gap-2">
-            <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-            320 960 9181
-        </a>
-    </nav>
-
-    <header class="min-h-screen flex flex-col justify-center relative px-6 md:px-20 pt-20">
-        <div class="absolute top-1/4 right-10 w-64 h-64 border border-white/5 rounded-full animate-pulse-slow hidden md:block"></div>
-        <div class="absolute bottom-10 left-10 font-mono text-xs text-gray-600">
-            COORDINATE: 41.9028° N / 12.4964° E<br>STATUS: OPERATIVO
-        </div>
-
-        <div class="max-w-5xl z-10">
-            <div class="inline-flex items-center gap-2 border border-white/20 bg-white/5 px-3 py-1 rounded-full mb-8 backdrop-blur-sm">
-                <span class="w-2 h-2 bg-asm-accent rounded-full"></span>
-                <span class="font-mono text-xs text-gray-300 uppercase">Ristrutturazioni & Impianti</span>
-            </div>
-            
-            <div class="mask-text">
-                <h1 class="text-5xl md:text-8xl font-bold leading-tight mb-2 reveal-text">Costruiamo</h1>
-            </div>
-            <div class="mask-text">
-                <h1 class="text-5xl md:text-8xl font-light text-gray-400 italic mb-8 reveal-text">Certezze.</h1>
-            </div>
-
-            <p class="max-w-xl text-gray-400 text-lg leading-relaxed mb-10 border-l-2 border-asm-accent pl-6 reveal-text">
-                A.S.M. Edilizia trasforma la complessità del cantiere in un processo lineare. Dalla demolizione alle finiture di pregio, garantiamo tempi certi e precisione millimetrica.
-            </p>
-
-            <div class="flex gap-4 reveal-text opacity-0">
-                <button onclick="toggleChat()" class="hover-trigger bg-white text-[#0B253C] px-8 py-4 font-bold text-sm uppercase tracking-widest hover:bg-gray-200 transition">
-                    Parla con l'AI
-                </button>
-                <a href="#progetti" class="hover-trigger border border-white/30 text-white px-8 py-4 text-sm uppercase tracking-widest hover:bg-white/10 transition">
-                    Vedi Progetti
-                </a>
-            </div>
-        </div>
-    </header>
-
-    <div class="py-6 bg-asm-accent overflow-hidden whitespace-nowrap border-y border-black/20">
-        <div class="inline-block animate-marquee text-[#0B253C] font-bold font-mono text-lg uppercase tracking-widest">
-            +++ Ristrutturazioni Chiavi in Mano +++ Impianti Idraulici Certificati +++ Pronto Intervento H24 +++ Design d'Interni +++ Pavimentazioni +++ A.S.M. EDILIZIA +++
         </div>
     </div>
 
-    <section id="servizi" class="py-24 px-6 md:px-20 bg-[#081b2d]">
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-px bg-white/10 border border-white/10">
-            
-            <div class="bg-[#0B253C] p-10 hover:bg-[#0e2e4a] transition duration-300 hover-trigger group">
-                <span class="font-mono text-asm-accent text-sm mb-4 block">01</span>
-                <h3 class="text-2xl font-bold mb-4 group-hover:translate-x-2 transition-transform">Ristrutturazione Completa</h3>
-                <p class="text-gray-400 text-sm leading-relaxed">
-                    Gestione totale del cantiere. Demolizioni, rifacimento massetti, posa pavimenti e rivestimenti. Un unico interlocutore per tutta la casa.
-                </p>
-                <ul class="mt-6 space-y-2 text-xs font-mono text-gray-500">
-                    <li>+ Demolizione e Smaltimento</li>
-                    <li>+ Cartongesso e Design</li>
-                    <li>+ Tinteggiatura</li>
-                </ul>
-            </div>
-
-            <div class="bg-[#0B253C] p-10 hover:bg-[#0e2e4a] transition duration-300 hover-trigger group">
-                <span class="font-mono text-asm-accent text-sm mb-4 block">02</span>
-                <h3 class="text-2xl font-bold mb-4 group-hover:translate-x-2 transition-transform">Impiantistica</h3>
-                <p class="text-gray-400 text-sm leading-relaxed">
-                    Realizzazione impianti idraulici ed elettrici conformi alle normative vigenti. Rilascio certificazioni di conformità.
-                </p>
-                <ul class="mt-6 space-y-2 text-xs font-mono text-gray-500">
-                    <li>+ Impianti Idro-sanitari</li>
-                    <li>+ Riscaldamento</li>
-                    <li>+ Condizionamento</li>
-                </ul>
-            </div>
-
-            <div class="bg-[#0B253C] p-10 hover:bg-[#0e2e4a] transition duration-300 hover-trigger group relative overflow-hidden">
-                <div class="absolute top-0 right-0 p-2">
-                    <div class="w-2 h-2 bg-red-500 rounded-full animate-ping"></div>
-                </div>
-                <span class="font-mono text-red-400 text-sm mb-4 block">URGENZE</span>
-                <h3 class="text-2xl font-bold mb-4 group-hover:translate-x-2 transition-transform">Pronto Intervento</h3>
-                <p class="text-gray-400 text-sm leading-relaxed">
-                    Squadra rapida per perdite d'acqua, guasti elettrici o danni strutturali urgenti. Interveniamo per limitare i danni.
-                </p>
-                <a href="tel:3209609181" class="mt-6 inline-block border-b border-red-400 text-red-400 pb-1 text-xs font-mono uppercase hover:text-white transition">Chiama Ora →</a>
+    <!-- NAVBAR -->
+    <nav class="fixed w-full z-50 px-6 py-4 glass flex justify-between items-center border-b-0">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 bg-white text-asm-900 flex items-center justify-center font-bold text-xl rounded-sm">A</div>
+            <div class="flex flex-col leading-none">
+                <span class="font-bold tracking-widest">A.S.M.</span>
+                <span class="text-[0.6rem] font-mono text-asm-400 uppercase tracking-[0.2em]">Edilizia</span>
             </div>
         </div>
-    </section>
-
-    <section id="lavori" class="py-32 relative">
-        <div class="px-6 md:px-20 mb-10 flex flex-col md:flex-row justify-between items-end">
-            <div>
-                <h2 class="text-4xl md:text-6xl font-bold mb-2">La Trasformazione</h2>
-                <p class="font-mono text-asm-accent text-sm">/// SWIPE TO REVEAL</p>
-            </div>
-        </div>
-
-        <div class="w-full h-[70vh] relative overflow-hidden group hover-trigger select-none" id="ba-slider">
-            <img src="https://images.unsplash.com/photo-1504307651254-35680f356dfd?q=80&w=2070&auto=format&fit=crop" class="absolute w-full h-full object-cover grayscale contrast-125" alt="Cantiere">
-            <div class="absolute top-10 left-10 bg-black/70 px-3 py-1 text-xs font-mono uppercase text-white">Fase: Cantiere</div>
-
-            <div class="absolute top-0 left-0 w-full h-full overflow-hidden" id="ba-foreground" style="clip-path: inset(0 50% 0 0);">
-                <img src="https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?q=80&w=2053&auto=format&fit=crop" class="w-full h-full object-cover" style="width: 100vw; max-width: none;" alt="Finito">
-                <div class="absolute top-10 right-10 bg-asm-accent px-3 py-1 text-xs font-mono uppercase text-black font-bold">Fase: Consegna</div>
-            </div>
-
-            <div class="absolute top-0 bottom-0 w-1 bg-white cursor-ew-resize z-20" id="ba-handle" style="left: 50%;">
-                <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-12 h-12 bg-[#0B253C] border-2 border-white rounded-full flex items-center justify-center text-white shadow-[0_0_20px_rgba(255,255,255,0.5)]">
-                    <i class="fas fa-arrows-left-right text-xs"></i>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <section class="py-20 px-6 md:px-20 border-b border-white/10">
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-10 text-center md:text-left">
-            <div>
-                <h4 class="text-5xl font-bold text-asm-accent mb-2 counter" data-target="15">0</h4>
-                <p class="font-mono text-xs text-gray-500 uppercase">Anni di Esperienza</p>
-            </div>
-            <div>
-                <h4 class="text-5xl font-bold text-white mb-2 counter" data-target="320">0</h4>
-                <p class="font-mono text-xs text-gray-500 uppercase">Progetti Conclusi</p>
-            </div>
-            <div>
-                <h4 class="text-5xl font-bold text-white mb-2 counter" data-target="100">0%</h4>
-                <p class="font-mono text-xs text-gray-500 uppercase">Clienti Soddisfatti</p>
-            </div>
-            <div>
-                <h4 class="text-5xl font-bold text-white mb-2">24/7</h4>
-                <p class="font-mono text-xs text-gray-500 uppercase">Reperibilità</p>
-            </div>
-        </div>
-    </section>
-
-    <footer id="contatti" class="bg-black pt-20 pb-10 px-6 md:px-20 relative overflow-hidden">
-        <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div>
         
-        <div class="relative z-10 grid grid-cols-1 md:grid-cols-2 gap-16 mb-20">
-            <div>
-                <span class="text-asm-accent font-mono text-xs mb-6 block">PARLIAMO DEL TUO PROGETTO</span>
-                <h2 class="text-5xl font-bold leading-tight mb-8">Hai una visione? <br>Costruiamola.</h2>
-                <div class="flex flex-col gap-4">
-                    <a href="mailto:info@asmedilizia.it" class="hover-trigger text-xl text-gray-400 hover:text-white transition">info@asmedilizia.it</a>
-                    <p class="text-gray-500 max-w-xs text-sm">Operiamo su Roma e provincia. Disponibili per sopralluoghi gratuiti.</p>
-                </div>
+        <div class="hidden md:flex gap-8 font-mono text-xs uppercase text-gray-400 tracking-wider">
+            <a href="#servizi" class="hover:text-white transition">Servizi</a>
+            <a href="#preventivo" class="hover:text-white transition">Preventivo</a>
+            <a href="#contatti" class="hover:text-white transition">Contatti</a>
+        </div>
+
+        <button onclick="toggleModal('client-modal')" class="border border-asm-400 text-asm-400 px-5 py-2 text-xs font-bold uppercase hover:bg-asm-400 hover:text-asm-900 transition rounded-sm flex items-center gap-2">
+            <i class="fas fa-lock"></i> Area Clienti
+        </button>
+    </nav>
+
+    <!-- HERO SECTION (Con 3D Background) -->
+    <section class="relative min-h-screen flex items-center pt-20 px-6 md:px-20 overflow-hidden">
+        <!-- 3D Container -->
+        <div id="canvas-container" class="absolute inset-0 z-0 opacity-40 md:opacity-100"></div>
+        <div class="absolute inset-0 bg-gradient-to-r from-asm-900 via-asm-900/80 to-transparent z-0 pointer-events-none"></div>
+
+        <div class="relative z-10 max-w-3xl">
+            <div class="inline-flex items-center gap-2 border border-white/10 bg-white/5 px-3 py-1 rounded-full mb-6 backdrop-blur-sm">
+                <span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+                <span class="font-mono text-xs text-gray-300 uppercase">Disponibili per Nuovi Cantieri</span>
             </div>
-            <div class="flex flex-col justify-center md:items-end">
-                <a href="tel:3209609181" class="hover-trigger bg-white text-black px-10 py-6 rounded-sm text-2xl font-bold hover:bg-asm-accent transition duration-300 flex items-center gap-4 shadow-[0_0_30px_rgba(255,255,255,0.1)]">
-                    <i class="fas fa-phone"></i>
-                    320 960 9181
+            
+            <h1 class="text-5xl md:text-7xl font-bold leading-tight mb-6 animate-float">
+                Costruiamo <br>
+                <span class="text-transparent bg-clip-text bg-gradient-to-r from-asm-400 to-white">Il Futuro.</span>
+            </h1>
+            
+            <p class="text-gray-400 text-lg max-w-lg mb-10 border-l-4 border-asm-400 pl-6">
+                Ristrutturazioni chiavi in mano con monitoraggio digitale. Dimentica lo stress del cantiere, A.S.M. ti garantisce tempi certi e costi chiari.
+            </p>
+
+            <div class="flex flex-col md:flex-row gap-4">
+                <a href="#preventivo" class="bg-asm-400 text-asm-900 px-8 py-4 font-bold uppercase tracking-widest hover:bg-white transition text-center shadow-[0_0_20px_rgba(56,189,248,0.4)]">
+                    Calcola Preventivo
+                </a>
+                <a href="https://wa.me/393209609181" class="border border-white/20 bg-white/5 text-white px-8 py-4 font-bold uppercase tracking-widest hover:bg-white/10 transition text-center flex items-center justify-center gap-2">
+                    <i class="fab fa-whatsapp"></i> Parla con noi
                 </a>
             </div>
         </div>
+    </section>
 
-        <div class="relative z-10 border-t border-white/10 pt-8 flex flex-col md:flex-row justify-between text-xs font-mono text-gray-600">
-            <p>&copy; 2025 A.S.M. EDILIZIA. P.IVA: 16334561004</p>
-            <div class="flex gap-4 mt-4 md:mt-0">
-                <a href="#" class="hover:text-white">Privacy</a>
-                <a href="#" class="hover:text-white">Cookie Policy</a>
+    <!-- SERVIZI GRID -->
+    <section id="servizi" class="py-24 px-6 md:px-20 bg-asm-800 border-y border-white/5">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-px bg-white/10 border border-white/10">
+            <!-- Card 1 -->
+            <div class="bg-asm-900 p-10 group hover:bg-asm-800 transition duration-300">
+                <i class="fas fa-drafting-compass text-4xl text-asm-400 mb-6 group-hover:scale-110 transition"></i>
+                <h3 class="text-xl font-bold mb-4">Progettazione 3D</h3>
+                <p class="text-gray-400 text-sm">Visualizza la tua casa prima di posare il primo mattone. Rendering fotorealistici inclusi.</p>
             </div>
+            <!-- Card 2 -->
+            <div class="bg-asm-900 p-10 group hover:bg-asm-800 transition duration-300">
+                <i class="fas fa-hammer text-4xl text-asm-400 mb-6 group-hover:scale-110 transition"></i>
+                <h3 class="text-xl font-bold mb-4">Ristrutturazione Completa</h3>
+                <p class="text-gray-400 text-sm">Demolizione, impianti, pavimenti e tinteggiatura. Un unico referente per tutto il cantiere.</p>
+            </div>
+            <!-- Card 3 -->
+            <div class="bg-asm-900 p-10 group hover:bg-asm-800 transition duration-300">
+                <i class="fas fa-file-contract text-4xl text-asm-400 mb-6 group-hover:scale-110 transition"></i>
+                <h3 class="text-xl font-bold mb-4">Pratiche & Bonus</h3>
+                <p class="text-gray-400 text-sm">Gestione CILA, SCIA e pratiche per detrazioni fiscali 50% e 65%.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- PREVENTIVATORE INTELLIGENTE -->
+    <section id="preventivo" class="py-24 px-6 md:px-20 relative">
+        <div class="max-w-6xl mx-auto">
+            <div class="text-center mb-16">
+                <span class="text-asm-400 font-mono text-xs uppercase tracking-widest">STIMA COSTI IN TEMPO REALE</span>
+                <h2 class="text-4xl font-bold mt-4">Configura il tuo Intervento</h2>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 glass p-8 md:p-12 rounded-2xl">
+                <!-- Controlli -->
+                <div class="space-y-10">
+                    
+                    <!-- Tipo -->
+                    <div>
+                        <label class="block text-sm font-bold mb-4 text-gray-300">TIPOLOGIA LAVORI</label>
+                        <div class="grid grid-cols-2 gap-4">
+                            <button onclick="setEstType('full')" id="btn-full" class="est-btn active p-4 border border-asm-400 bg-asm-400/20 rounded text-left transition hover:bg-asm-400/30">
+                                <i class="fas fa-home text-xl mb-2 text-asm-400"></i>
+                                <div class="font-bold text-sm">Ristrutturazione Totale</div>
+                            </button>
+                            <button onclick="setEstType('bath')" id="btn-bath" class="est-btn p-4 border border-white/10 bg-transparent rounded text-left transition hover:bg-white/5">
+                                <i class="fas fa-bath text-xl mb-2 text-gray-400"></i>
+                                <div class="font-bold text-sm text-gray-400">Rifacimento Bagno</div>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Slider MQ -->
+                    <div>
+                        <div class="flex justify-between mb-4">
+                            <label class="text-sm font-bold text-gray-300">SUPERFICIE</label>
+                            <span class="font-mono text-asm-400 font-bold text-xl"><span id="mq-display">80</span> mq</span>
+                        </div>
+                        <input type="range" id="mq-input" min="10" max="250" value="80" class="w-full" oninput="calcEstimate()">
+                    </div>
+
+                    <!-- Qualità -->
+                    <div>
+                        <label class="block text-sm font-bold mb-4 text-gray-300">LIVELLO FINITURE</label>
+                        <div class="flex bg-black/40 p-1 rounded-lg">
+                            <button onclick="setEstLevel('basic')" class="lvl-btn flex-1 py-3 text-xs font-bold rounded-md text-gray-400 transition hover:text-white" data-lvl="basic">BASIC</button>
+                            <button onclick="setEstLevel('standard')" class="lvl-btn flex-1 py-3 text-xs font-bold rounded-md bg-white text-asm-900 shadow-lg" data-lvl="standard">STANDARD</button>
+                            <button onclick="setEstLevel('premium')" class="lvl-btn flex-1 py-3 text-xs font-bold rounded-md text-gray-400 transition hover:text-white" data-lvl="premium">PREMIUM</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Risultato -->
+                <div class="bg-asm-900 border border-white/10 rounded-xl p-8 flex flex-col justify-between relative overflow-hidden">
+                    <div class="absolute top-0 right-0 p-32 bg-asm-400 rounded-full blur-[100px] opacity-10 pointer-events-none"></div>
+                    
+                    <div>
+                        <span class="font-mono text-xs text-gray-500 uppercase">STIMA PRELIMINARE (IVA ESCL.)</span>
+                        <div class="text-5xl md:text-6xl font-bold text-white mt-2 mb-1" id="total-price">€ 48.000</div>
+                        <p class="text-xs text-gray-400 mt-4 leading-relaxed">
+                            Include: <span id="materials-text" class="text-white">Demolizioni, Impianti certificati, Pavimenti in gres, Tinteggiatura lavabile.</span>
+                        </p>
+                    </div>
+
+                    <div class="mt-10 pt-8 border-t border-white/10 space-y-3 font-mono text-xs">
+                        <div class="flex justify-between">
+                            <span class="text-gray-500">Durata Stimata:</span>
+                            <span class="text-asm-400" id="time-text">5-6 Settimane</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-500">Bonus Fiscale:</span>
+                            <span class="text-green-400">Applicabile (50%)</span>
+                        </div>
+                    </div>
+
+                    <button onclick="alert('Verrai reindirizzato a WhatsApp per inviare questa stima.')" class="w-full mt-8 bg-white text-asm-900 py-4 font-bold uppercase tracking-widest hover:bg-gray-200 transition">
+                        Richiedi Sopralluogo Gratuito
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- AREA CLIENTI (MODALE) -->
+    <div id="client-modal" class="fixed inset-0 z-[100] bg-black/90 backdrop-blur-md hidden flex items-center justify-center p-4">
+        
+        <!-- LOGIN SCREEN -->
+        <div id="login-screen" class="w-full max-w-md bg-asm-800 border border-white/10 p-8 rounded-2xl shadow-2xl transform transition-all">
+            <div class="flex justify-between items-center mb-8">
+                <h3 class="text-xl font-bold">Accesso Riservato</h3>
+                <button onclick="toggleModal('client-modal')" class="text-gray-500 hover:text-white"><i class="fas fa-times"></i></button>
+            </div>
+            
+            <div class="space-y-4">
+                <div>
+                    <label class="text-xs font-mono text-gray-400 uppercase mb-2 block">Codice Progetto</label>
+                    <input type="text" value="PRJ-2025-RM" class="w-full bg-black/30 border border-white/10 p-3 rounded text-white focus:border-asm-400 outline-none transition">
+                </div>
+                <div>
+                    <label class="text-xs font-mono text-gray-400 uppercase mb-2 block">Password</label>
+                    <input type="password" id="password-input" placeholder="Inserisci 'admin'" class="w-full bg-black/30 border border-white/10 p-3 rounded text-white focus:border-asm-400 outline-none transition">
+                </div>
+                <p id="login-error" class="text-red-500 text-xs hidden">Password errata. Prova con 'admin'.</p>
+                <button onclick="checkLogin()" class="w-full bg-asm-400 text-asm-900 font-bold py-3 rounded hover:bg-white transition mt-2">ACCEDI AL CANTIERE</button>
+            </div>
+            <div class="mt-6 text-center">
+                <a href="#" class="text-xs text-gray-500 hover:text-asm-400">Password dimenticata?</a>
+            </div>
+        </div>
+
+        <!-- DASHBOARD (NASCOSTA DI DEFAULT) -->
+        <div id="dashboard-screen" class="w-full max-w-6xl h-[85vh] bg-asm-900 border border-white/10 rounded-xl shadow-2xl hidden flex flex-col overflow-hidden">
+            <!-- Dash Header -->
+            <div class="bg-asm-800 p-4 border-b border-white/10 flex justify-between items-center">
+                <div class="flex items-center gap-4">
+                    <div class="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+                    <div>
+                        <h4 class="font-bold text-white">Cantiere: Villa Cassia</h4>
+                        <span class="text-[10px] font-mono text-gray-400 uppercase">Stato: In Lavorazione (45%)</span>
+                    </div>
+                </div>
+                <button onclick="logout()" class="text-xs border border-red-500/30 text-red-400 px-3 py-1 rounded hover:bg-red-500 hover:text-white transition">ESCI</button>
+            </div>
+            
+            <!-- Dash Body -->
+            <div class="flex-1 overflow-y-auto p-6 md:p-8">
+                <!-- Stats -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                    <div class="glass p-6 rounded-lg border-l-4 border-asm-400">
+                        <div class="text-gray-400 text-xs font-mono uppercase mb-2">Budget Utilizzato</div>
+                        <div class="text-2xl font-bold">€ 24.500</div>
+                        <div class="w-full bg-gray-700 h-1 mt-3 rounded"><div class="bg-asm-400 h-full w-[45%]"></div></div>
+                    </div>
+                    <div class="glass p-6 rounded-lg">
+                        <div class="text-gray-400 text-xs font-mono uppercase mb-2">Prossima Milestone</div>
+                        <div class="text-xl font-bold">Posa Impianti</div>
+                        <div class="text-green-400 text-xs mt-1">Previsto: 24 Nov</div>
+                    </div>
+                    <div class="glass p-6 rounded-lg cursor-pointer hover:bg-white/5 transition">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <div class="text-gray-400 text-xs font-mono uppercase mb-2">Nuovi Documenti</div>
+                                <div class="text-xl font-bold">2 Fatture</div>
+                            </div>
+                            <i class="fas fa-file-pdf text-2xl text-gray-600"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Timeline -->
+                <h3 class="font-bold text-lg mb-4 border-b border-white/10 pb-2">Diario di Cantiere</h3>
+                <div class="space-y-8 pl-4 border-l border-white/10 ml-2">
+                    <div class="relative">
+                        <div class="absolute -left-[21px] top-0 w-3 h-3 bg-asm-400 rounded-full outline outline-4 outline-asm-900"></div>
+                        <div class="text-xs font-mono text-asm-400 mb-1">OGGI, 10:30</div>
+                        <div class="bg-white/5 p-4 rounded-lg border border-white/5">
+                            <p class="text-sm text-gray-300 mb-3">Completata la rimozione del vecchio massetto. Iniziata la posa delle tubazioni idrauliche cucina.</p>
+                            <!-- Foto simulate (placeholder colorati) -->
+                            <div class="flex gap-2">
+                                <div class="w-24 h-24 bg-gray-700 rounded-md animate-pulse"></div>
+                                <div class="w-24 h-24 bg-gray-600 rounded-md animate-pulse"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="relative">
+                        <div class="absolute -left-[21px] top-0 w-3 h-3 bg-gray-600 rounded-full outline outline-4 outline-asm-900"></div>
+                        <div class="text-xs font-mono text-gray-500 mb-1">18 NOVEMBRE</div>
+                        <p class="text-sm text-gray-500">Consegna materiali e allestimento ponteggi esterni.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- FOOTER -->
+    <footer id="contatti" class="bg-black pt-20 pb-10 px-6 md:px-20 border-t border-white/10">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-12 mb-16">
+            <div>
+                <h4 class="text-xl font-bold mb-6 text-white">A.S.M. EDILIZIA</h4>
+                <p class="text-gray-500 text-sm leading-relaxed">
+                    Precisione costruttiva e trasparenza digitale. <br>Operiamo su Roma e provincia.
+                </p>
+            </div>
+            <div>
+                <h4 class="text-sm font-bold mb-6 text-white uppercase tracking-widest">Contatti</h4>
+                <ul class="space-y-4 text-sm text-gray-400">
+                    <li class="flex items-center gap-3"><i class="fas fa-map-marker-alt text-asm-400"></i> Via Appia Nuova, Roma</li>
+                    <li class="flex items-center gap-3"><i class="fas fa-phone text-asm-400"></i> <a href="tel:3209609181" class="hover:text-white">320 960 9181</a></li>
+                    <li class="flex items-center gap-3"><i class="fas fa-envelope text-asm-400"></i> info@asmedilizia.it</li>
+                </ul>
+            </div>
+            <div>
+                <h4 class="text-sm font-bold mb-6 text-white uppercase tracking-widest">Link Utili</h4>
+                <div class="flex flex-col gap-2 text-sm text-gray-500">
+                    <a href="#" class="hover:text-asm-400">Privacy Policy</a>
+                    <a href="#" class="hover:text-asm-400">Cookie Policy</a>
+                    <a href="#" class="hover:text-asm-400">Lavora con noi</a>
+                </div>
+            </div>
+        </div>
+        <div class="text-center text-xs font-mono text-gray-700 pt-8 border-t border-white/5">
+            © 2025 A.S.M. EDILIZIA - P.IVA: 12345678901
         </div>
     </footer>
 
-    <button onclick="toggleChat()" class="fixed bottom-8 right-8 w-14 h-14 bg-asm-accent rounded-full flex items-center justify-center z-50 shadow-[0_0_20px_rgba(56,189,248,0.5)] hover:scale-110 transition duration-300 hover-trigger text-[#0B253C]">
-        <i class="fas fa-robot text-2xl"></i>
-    </button>
+    <!-- WHATSAPP FLOATING BUTTON -->
+    <a href="https://wa.me/393209609181" target="_blank" class="fixed bottom-6 right-6 z-40 w-14 h-14 bg-[#25D366] text-white rounded-full flex items-center justify-center shadow-[0_0_20px_rgba(37,211,102,0.4)] hover:scale-110 transition duration-300">
+        <i class="fab fa-whatsapp text-3xl"></i>
+    </a>
 
-    <div id="chat-window" class="fixed bottom-24 right-8 w-80 md:w-96 bg-[#0f1f2e]/95 border border-white/10 rounded-xl chat-container overflow-hidden z-50 transform translate-y-[120%] opacity-0 transition-all duration-500 flex flex-col">
-        <div class="bg-[#0B253C] p-4 border-b border-white/10 flex justify-between items-center">
-            <div class="flex items-center gap-3">
-                <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                <div>
-                    <h4 class="text-sm font-bold text-white">A.S.M. Assistant</h4>
-                    <p class="text-[10px] text-gray-400 font-mono uppercase">AI Powered</p>
-                </div>
-            </div>
-            <button onclick="toggleChat()" class="text-gray-400 hover:text-white"><i class="fas fa-times"></i></button>
-        </div>
-
-        <div id="chat-messages" class="h-80 overflow-y-auto p-4 flex flex-col gap-3">
-            <div class="self-start bg-white/10 p-3 rounded-tr-lg rounded-br-lg rounded-bl-lg max-w-[85%] text-sm text-gray-200 border border-white/5">
-                Ciao! Sono l'assistente virtuale di A.S.M. Edilizia. 🏗️<br>Posso aiutarti con preventivi, informazioni sui servizi o emergenze. Dimmi pure.
-            </div>
-        </div>
-
-        <div class="p-4 border-t border-white/10 bg-[#0B253C]">
-            <form id="chat-form" class="flex gap-2" onsubmit="handleChat(event)">
-                <input type="text" id="chat-input" placeholder="Scrivi qui..." class="flex-1 bg-black/30 border border-white/10 rounded px-3 py-2 text-sm text-white focus:outline-none focus:border-asm-accent font-mono">
-                <button type="submit" class="bg-asm-accent text-[#0B253C] px-3 py-2 rounded hover:bg-white transition">
-                    <i class="fas fa-paper-plane"></i>
-                </button>
-            </form>
-        </div>
-    </div>
-
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/gh/studio-freight/lenis@1.0.29/bundled/lenis.min.js"></script>
-
+    <!-- JAVASCRIPT LOGIC -->
     <script>
-        // --- 1. SMOOTH SCROLL SETUP ---
-        const lenis = new Lenis({ duration: 1.2, easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)) });
-        function raf(time) { lenis.raf(time); requestAnimationFrame(raf); }
-        requestAnimationFrame(raf);
-
-        // --- 2. CURSOR FIX (GSAP QuickTo) ---
-        const cursor = document.getElementById('cursor');
-        const xTo = gsap.quickTo(cursor, "x", {duration: 0.1, ease: "power3"});
-        const yTo = gsap.quickTo(cursor, "y", {duration: 0.1, ease: "power3"});
-
-        window.addEventListener('mousemove', (e) => {
-            xTo(e.clientX);
-            yTo(e.clientY);
+        // --- 1. LOADER ---
+        window.addEventListener('load', () => {
+            document.getElementById('load-bar').style.width = '100%';
+            setTimeout(() => {
+                document.getElementById('loader').style.opacity = '0';
+                setTimeout(() => document.getElementById('loader').remove(), 500);
+                init3D(); // Avvia il 3D solo dopo il load
+            }, 800);
         });
 
-        // Hover effect sugli elementi interattivi
-        document.querySelectorAll('.hover-trigger, a, button, input').forEach(el => {
-            el.addEventListener('mouseenter', () => cursor.classList.add('scale-[3]', 'bg-transparent', 'border', 'border-white'));
-            el.addEventListener('mouseleave', () => cursor.classList.remove('scale-[3]', 'bg-transparent', 'border', 'border-white'));
-        });
-
-        // --- 3. ANIMAZIONI SCROLL (GSAP) ---
-        gsap.registerPlugin(ScrollTrigger);
+        // --- 2. LOGICA PREVENTIVATORE ---
+        let currentType = 'full';
+        let currentLevel = 'standard';
         
-        // Reveal Text Hero
-        gsap.utils.toArray('.reveal-text').forEach((text, i) => {
-            gsap.fromTo(text, 
-                { y: 50, opacity: 0 },
-                { y: 0, opacity: 1, duration: 1.5, delay: 0.2 * i, ease: "power4.out" }
-            );
-        });
+        function setEstType(type) {
+            currentType = type;
+            // Update UI styles
+            const btnFull = document.getElementById('btn-full');
+            const btnBath = document.getElementById('btn-bath');
+            
+            if(type === 'full') {
+                updateBtnStyle(btnFull, true);
+                updateBtnStyle(btnBath, false);
+            } else {
+                updateBtnStyle(btnFull, false);
+                updateBtnStyle(btnBath, true);
+            }
+            calcEstimate();
+        }
 
-        // Contatori Numeri
-        gsap.utils.toArray('.counter').forEach(counter => {
-            const target = +counter.getAttribute('data-target');
-            ScrollTrigger.create({
-                trigger: counter,
-                start: "top 85%",
-                once: true,
-                onEnter: () => {
-                    gsap.to(counter, {
-                        innerText: target,
-                        duration: 2,
-                        snap: { innerText: 1 },
-                        onUpdate: function() {
-                            counter.innerText = Math.ceil(this.targets()[0].innerText) + (counter.innerText.includes('%') ? '%' : '');
-                        }
-                    });
+        function updateBtnStyle(el, active) {
+            if(active) {
+                el.className = "est-btn active p-4 border border-asm-400 bg-asm-400/20 rounded text-left transition shadow-[0_0_15px_rgba(56,189,248,0.1)]";
+                el.querySelector('i').className = `fas ${el.id === 'btn-full' ? 'fa-home' : 'fa-bath'} text-xl mb-2 text-asm-400`;
+                el.querySelector('div').className = "font-bold text-sm text-white";
+            } else {
+                el.className = "est-btn p-4 border border-white/10 bg-transparent rounded text-left transition hover:bg-white/5";
+                el.querySelector('i').className = `fas ${el.id === 'btn-full' ? 'fa-home' : 'fa-bath'} text-xl mb-2 text-gray-400`;
+                el.querySelector('div').className = "font-bold text-sm text-gray-400";
+            }
+        }
+
+        function setEstLevel(lvl) {
+            currentLevel = lvl;
+            document.querySelectorAll('.lvl-btn').forEach(btn => {
+                if(btn.dataset.lvl === lvl) {
+                    btn.className = "lvl-btn flex-1 py-3 text-xs font-bold rounded-md bg-white text-asm-900 shadow-lg transition transform scale-105";
+                } else {
+                    btn.className = "lvl-btn flex-1 py-3 text-xs font-bold rounded-md text-gray-400 transition hover:text-white";
                 }
             });
-        });
-
-        // --- 4. BEFORE / AFTER SLIDER ---
-        const slider = document.getElementById('ba-slider');
-        const foreground = document.getElementById('ba-foreground');
-        const handle = document.getElementById('ba-handle');
-
-        function moveSlider(e) {
-            const rect = slider.getBoundingClientRect();
-            let clientX = e.touches ? e.touches[0].clientX : e.clientX;
-            let percent = ((clientX - rect.left) / rect.width) * 100;
-            percent = Math.max(0, Math.min(100, percent));
-            
-            foreground.style.clipPath = `inset(0 ${100 - percent}% 0 0)`;
-            handle.style.left = `${percent}%`;
+            calcEstimate();
         }
 
-        slider.addEventListener('mousemove', moveSlider);
-        slider.addEventListener('touchmove', moveSlider);
+        function calcEstimate() {
+            const mq = parseInt(document.getElementById('mq-input').value);
+            document.getElementById('mq-display').innerText = mq;
 
-        // --- 5. CHATBOT LOGIC (AI SIMULATA) ---
-        let isChatOpen = false;
-        const chatWindow = document.getElementById('chat-window');
-        const messagesContainer = document.getElementById('chat-messages');
+            let basePrice = 0;
+            let weeks = 0;
 
-        function toggleChat() {
-            isChatOpen = !isChatOpen;
-            if (isChatOpen) {
-                chatWindow.classList.remove('translate-y-[120%]', 'opacity-0');
+            // Logica di Prezzo (Esempio)
+            if(currentType === 'full') {
+                basePrice = mq * 500; 
+                weeks = Math.ceil(mq / 15) + 2;
             } else {
-                chatWindow.classList.add('translate-y-[120%]', 'opacity-0');
+                basePrice = 3000 + (mq * 300); // Bagno base + mq
+                weeks = 2;
             }
+
+            // Moltiplicatori Qualità
+            const multis = { 'basic': 0.8, 'standard': 1.0, 'premium': 1.5 };
+            const total = Math.round(basePrice * multis[currentLevel]);
+
+            // Update Testi
+            document.getElementById('total-price').innerText = '€ ' + total.toLocaleString('it-IT');
+            document.getElementById('time-text').innerText = weeks + "-" + (weeks+1) + " Settimane";
+
+            const materials = {
+                'basic': "Pavimenti laminato, sanitari standard, pittura bianca.",
+                'standard': "Gres porcellanato, sanitari sospesi, tinteggiatura lavabile.",
+                'premium': "Parquet/Resina, rubinetteria design, domotica base."
+            };
+            document.getElementById('materials-text').innerText = materials[currentLevel];
         }
 
-        async function handleChat(e) {
-            e.preventDefault();
-            const input = document.getElementById('chat-input');
-            const userText = input.value.trim();
-            if (!userText) return;
-
-            // 1. Aggiungi messaggio utente
-            addMessage(userText, 'user');
-            input.value = '';
-
-            // 2. Mostra "sta scrivendo..."
-            const loadingId = addLoading();
-            messagesContainer.scrollTop = messagesContainer.scrollHeight;
-
-            // 3. Simula ritardo AI
-            setTimeout(() => {
-                removeMessage(loadingId);
-                const reply = generateResponse(userText);
-                addMessage(reply, 'bot');
-            }, 1500);
-        }
-
-        function addMessage(text, sender) {
-            const div = document.createElement('div');
-            div.className = `message-enter p-3 rounded-lg max-w-[85%] text-sm ${sender === 'user' 
-                ? 'self-end bg-asm-accent text-[#0B253C] rounded-br-none font-bold' 
-                : 'self-start bg-white/10 text-gray-200 rounded-bl-none border border-white/5'}`;
-            div.innerHTML = text;
-            messagesContainer.appendChild(div);
-            messagesContainer.scrollTop = messagesContainer.scrollHeight;
-        }
-
-        function addLoading() {
-            const id = 'loading-' + Date.now();
-            const div = document.createElement('div');
-            div.id = id;
-            div.className = 'self-start bg-white/10 p-3 rounded-lg text-xs text-gray-400 flex gap-1 items-center';
-            div.innerHTML = '<span class="animate-bounce">●</span><span class="animate-bounce" style="animation-delay:0.1s">●</span><span class="animate-bounce" style="animation-delay:0.2s">●</span>';
-            messagesContainer.appendChild(div);
-            return id;
-        }
-
-        function removeMessage(id) {
+        // --- 3. AREA CLIENTI SIMULATA ---
+        function toggleModal(id) {
             const el = document.getElementById(id);
-            if (el) el.remove();
+            el.classList.toggle('hidden');
+            if(el.classList.contains('hidden')) {
+                // Reset se chiudo
+                document.getElementById('login-screen').classList.remove('hidden');
+                document.getElementById('dashboard-screen').classList.add('hidden');
+                document.getElementById('login-error').classList.add('hidden');
+                document.getElementById('password-input').value = '';
+            }
         }
 
-        // LOGICA BOT (Qui puoi collegare vere API in futuro)
-        function generateResponse(text) {
-            text = text.toLowerCase();
+        function checkLogin() {
+            const pass = document.getElementById('password-input').value;
+            if(pass === 'admin') {
+                document.getElementById('login-screen').classList.add('hidden');
+                document.getElementById('dashboard-screen').classList.remove('hidden');
+                document.getElementById('dashboard-screen').classList.add('flex');
+            } else {
+                document.getElementById('login-error').classList.remove('hidden');
+            }
+        }
+        function logout() { toggleModal('client-modal'); }
 
-            // Logica locale basata su parole chiave
-            if (text.includes('prezzo') || text.includes('costo') || text.includes('preventivo')) {
-                return "Per un preventivo preciso abbiamo bisogno di un sopralluogo gratuito. Puoi chiamarci al <b>320 960 9181</b> o lasciarci un recapito qui.";
+        // --- 4. 3D ENGINE (Three.js Procedurale) ---
+        // Genera una "casa wireframe" senza bisogno di caricare file esterni (per funzionare in locale)
+        function init3D() {
+            const container = document.getElementById('canvas-container');
+            if(!container) return;
+
+            const scene = new THREE.Scene();
+            // Fog per profondità
+            scene.fog = new THREE.FogExp2(0x0B253C, 0.05);
+
+            const camera = new THREE.PerspectiveCamera(50, container.clientWidth / container.clientHeight, 0.1, 1000);
+            camera.position.set(5, 3, 7);
+            camera.lookAt(0, 0, 0);
+
+            const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+            renderer.setSize(container.clientWidth, container.clientHeight);
+            renderer.setPixelRatio(window.devicePixelRatio);
+            container.appendChild(renderer.domElement);
+
+            // Creiamo una casa stilizzata "Blueprint"
+            const group = new THREE.Group();
+
+            // Base
+            const geometryBase = new THREE.BoxGeometry(3, 1.5, 4);
+            const edgesBase = new THREE.EdgesGeometry(geometryBase);
+            const materialLines = new THREE.LineBasicMaterial({ color: 0x38bdf8, opacity: 0.4, transparent: true });
+            const base = new THREE.LineSegments(edgesBase, materialLines);
+            group.add(base);
+
+            // Tetto (Prisma)
+            const geometryRoof = new THREE.ConeGeometry(2.8, 1.5, 4);
+            const edgesRoof = new THREE.EdgesGeometry(geometryRoof);
+            const roof = new THREE.LineSegments(edgesRoof, materialLines);
+            roof.position.y = 1.5;
+            roof.rotation.y = Math.PI / 4;
+            group.add(roof);
+
+            // Particelle flottanti (Polvere di cantiere digitale)
+            const particlesGeo = new THREE.BufferGeometry();
+            const particlesCount = 200;
+            const posArray = new Float32Array(particlesCount * 3);
+            for(let i=0; i < particlesCount * 3; i++) {
+                posArray[i] = (Math.random() - 0.5) * 10;
             }
-            if (text.includes('idraulic') || text.includes('perdita') || text.includes('acqua')) {
-                return "Per le urgenze idrauliche siamo operativi h24. Se è un'emergenza, chiama subito il pulsante verde in alto!";
-            }
-            if (text.includes('bagno') || text.includes('cucina')) {
-                return "Siamo specializzati in ristrutturazioni di bagni e cucine chiavi in mano. Ci occupiamo di tutto: demolizione, impianti e posa.";
-            }
-            if (text.includes('ciao') || text.includes('salve')) {
-                return "Ciao! Come posso esserti utile per la tua casa oggi?";
-            }
-            if (text.includes('dove') || text.includes('zona')) {
-                return "Operiamo principalmente a Roma e provincia, ma valutiamo progetti in tutto il Lazio.";
-            }
-            
-            // Fallback generico
-            return "Grazie per la domanda. Per darti una risposta tecnica precisa, preferisco farti parlare con un nostro geometra. Chiama il 320 960 9181.";
-            
-            /* --- SEZIONE API REALE (Opzionale per il futuro) ---
-            Se volessi usare OpenAI, dovresti sostituire questa funzione con una fetch() 
-            al tuo server backend (non mettere mai la API KEY qui nel frontend).
-            */
+            particlesGeo.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+            const particlesMat = new THREE.PointsMaterial({ size: 0.02, color: 0x38bdf8, transparent: true, opacity: 0.6 });
+            const particlesMesh = new THREE.Points(particlesGeo, particlesMat);
+            scene.add(particlesMesh);
+
+            scene.add(group);
+
+            // Animazione
+            const animate = function () {
+                requestAnimationFrame(animate);
+                group.rotation.y += 0.002; // Rotazione lenta casa
+                particlesMesh.rotation.y -= 0.001; // Controrotazione particelle
+                renderer.render(scene, camera);
+            };
+            animate();
+
+            // Resize
+            window.addEventListener('resize', () => {
+                camera.aspect = container.clientWidth / container.clientHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(container.clientWidth, container.clientHeight);
+            });
         }
 
-        // Animazione Marquee Tailwind
-        tailwind.config.theme.extend.keyframes = {
-            ...tailwind.config.theme.extend.keyframes,
-            marquee: {
-                '0%': { transform: 'translateX(0%)' },
-                '100%': { transform: 'translateX(-50%)' },
-            }
-        };
-        tailwind.config.theme.extend.animation = {
-            ...tailwind.config.theme.extend.animation,
-            marquee: 'marquee 30s linear infinite',
-        };
+        // Init calc iniziale
+        calcEstimate();
     </script>
 </body>
 </html>
