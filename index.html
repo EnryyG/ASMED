@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="it" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A.S.M. EDILIZIA | Precisione Costruttiva</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;800&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'asm-blue': '#0B253C', /* Blu tecnico del logo */
+                        'asm-accent': '#38bdf8', /* Ciano elettrico per i dettagli */
+                    },
+                    fontFamily: {
+                        sans: ['Montserrat', 'sans-serif'],
+                        mono: ['Space Mono', 'monospace'],
+                    },
+                    animation: {
+                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #0B253C;
+            color: #ffffff;
+            overflow-x: hidden;
+            cursor: none; /* Nascondiamo il cursore di sistema */
+        }
+
+        /* GRID BACKGROUND - Effetto Blueprint */
+        .bg-grid {
+            background-image: 
+                linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+            background-size: 50px 50px;
+        }
+
+        /* --- CURSORE FIX --- */
+        .cursor-follower {
+            position: fixed;
+            top: 0; left: 0;
+            width: 20px; height: 20px;
+            background-color: white;
+            border-radius: 50%;
+            pointer-events: none; /* Fondamentale: permette di cliccare attraverso */
+            z-index: 99999;
+            mix-blend-mode: difference; /* Si vede su bianco e nero */
+            transform: translate(-50%, -50%);
+        }
+        
+        /* Stato Hover del cursore */
+        body.hovering .cursor-follower {
+            transform: translate(-50%, -50%) scale(3);
+            background-color: transparent;
+            border: 1px solid white;
+        }
+
+        /* Text Reveal */
+        .mask-text { overflow: hidden; }
+        
+        /* Chatbot Styles */
+        .chat-container {
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+            backdrop-filter: blur(10px);
+        }
+        .message-enter { animation: slideIn 0.3s ease forwards; opacity: 0; transform: translateY(10px); }
+        @keyframes slideIn { to { opacity: 1; transform: translateY(0); } }
+        
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #0B253C; }
+        ::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
+    </style>
+</head>
+<body class="bg-grid selection:bg-asm-accent selection:text-black">
+
+    <div class="cursor-follower" id="cursor"></div>
+
+    <nav class="fixed w-full z-50 px-6 py-4 flex justify-between items-center bg-[#0B253C]/90 backdrop-blur-md border-b border-white/10 transition-all duration-300" id="navbar">
+        <div class="flex items-center gap-4">
+            <div class="w-10 h-10 bg-white flex items-end justify-center pb-1 rounded-sm">
+                <div class="flex gap-1 items-end">
+                    <div class="w-2 h-4 bg-[#0B253C]"></div>
+                    <div class="w-2 h-6 bg-[#0B253C]"></div>
+                    <div class="w-2 h-3 bg-[#0B253C]"></div>
+                </div>
+            </div>
+            <div class="flex flex-col leading-none">
+                <span class="text-xl font-bold tracking-wider">A.S.M.</span>
+                <span class="text-[0.6rem] font-mono text-asm-accent uppercase tracking-[0.3em]">Edilizia</span>
+            </div>
+        </div>
+        
+        <div class="hidden md:flex gap-8 font-mono text-xs uppercase tracking-widest text-gray-400">
+            <a href="#servizi" class="hover:text-white hover-trigger transition">Servizi</a>
+            <a href="#lavori" class="hover:text-white hover-trigger transition">Lavori</a>
+            <a href="#contatti" class="hover:text-white hover-trigger transition">Contatti</a>
+        </div>
+
+        <a href="tel:3209609181" class="hover-trigger border border-asm-accent text-asm-accent px-6 py-2 rounded-sm font-mono text-xs hover:bg-asm-accent hover:text-black transition duration-300 flex items-center gap-2">
+            <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+            320 960 9181
+        </a>
+    </nav>
+
+    <header class="min-h-screen flex flex-col justify-center relative px-6 md:px-20 pt-20">
+        <div class="absolute top-1/4 right-10 w-64 h-64 border border-white/5 rounded-full animate-pulse-slow hidden md:block"></div>
+        <div class="absolute bottom-10 left-10 font-mono text-xs text-gray-600">
+            COORDINATE: 41.9028° N / 12.4964° E<br>STATUS: OPERATIVO
+        </div>
+
+        <div class="max-w-5xl z-10">
+            <div class="inline-flex items-center gap-2 border border-white/20 bg-white/5 px-3 py-1 rounded-full mb-8 backdrop-blur-sm">
+                <span class="w-2 h-2 bg-asm-accent rounded-full"></span>
+                <span class="font-mono text-xs text-gray-300 uppercase">Ristrutturazioni & Impianti</span>
+            </div>
+            
+            <div class="mask-text">
+                <h1 class="text-5xl md:text-8xl font-bold leading-tight mb-2 reveal-text">Costruiamo</h1>
+            </div>
+            <div class="mask-text">
+                <h1 class="text-5xl md:text-8xl font-light text-gray-400 italic mb-8 reveal-text">Certezze.</h1>
+            </div>
+
+            <p class="max-w-xl text-gray-400 text-lg leading-relaxed mb-10 border-l-2 border-asm-accent pl-6 reveal-text">
+                A.S.M. Edilizia trasforma la complessità del cantiere in un processo lineare. Dalla demolizione alle finiture di pregio, garantiamo tempi certi e precisione millimetrica.
+            </p>
+
+            <div class="flex gap-4 reveal-text opacity-0">
+                <button onclick="toggleChat()" class="hover-trigger bg-white text-[#0B253C] px-8 py-4 font-bold text-sm uppercase tracking-widest hover:bg-gray-200 transition">
+                    Parla con l'AI
+                </button>
+                <a href="#progetti" class="hover-trigger border border-white/30 text-white px-8 py-4 text-sm uppercase tracking-widest hover:bg-white/10 transition">
+                    Vedi Progetti
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <div class="py-6 bg-asm-accent overflow-hidden whitespace-nowrap border-y border-black/20">
+        <div class="inline-block animate-marquee text-[#0B253C] font-bold font-mono text-lg uppercase tracking-widest">
+            +++ Ristrutturazioni Chiavi in Mano +++ Impianti Idraulici Certificati +++ Pronto Intervento H24 +++ Design d'Interni +++ Pavimentazioni +++ A.S.M. EDILIZIA +++
+        </div>
+    </div>
+
+    <section id="servizi" class="py-24 px-6 md:px-20 bg-[#081b2d]">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-px bg-white/10 border border-white/10">
+            
+            <div class="bg-[#0B253C] p-10 hover:bg-[#0e2e4a] transition duration-300 hover-trigger group">
+                <span class="font-mono text-asm-accent text-sm mb-4 block">01</span>
+                <h3 class="text-2xl font-bold mb-4 group-hover:translate-x-2 transition-transform">Ristrutturazione Completa</h3>
+                <p class="text-gray-400 text-sm leading-relaxed">
+                    Gestione totale del cantiere. Demolizioni, rifacimento massetti, posa pavimenti e rivestimenti. Un unico interlocutore per tutta la casa.
+                </p>
+                <ul class="mt-6 space-y-2 text-xs font-mono text-gray-500">
+                    <li>+ Demolizione e Smaltimento</li>
+                    <li>+ Cartongesso e Design</li>
+                    <li>+ Tinteggiatura</li>
+                </ul>
+            </div>
+
+            <div class="bg-[#0B253C] p-10 hover:bg-[#0e2e4a] transition duration-300 hover-trigger group">
+                <span class="font-mono text-asm-accent text-sm mb-4 block">02</span>
+                <h3 class="text-2xl font-bold mb-4 group-hover:translate-x-2 transition-transform">Impiantistica</h3>
+                <p class="text-gray-400 text-sm leading-relaxed">
+                    Realizzazione impianti idraulici ed elettrici conformi alle normative vigenti. Rilascio certificazioni di conformità.
+                </p>
+                <ul class="mt-6 space-y-2 text-xs font-mono text-gray-500">
+                    <li>+ Impianti Idro-sanitari</li>
+                    <li>+ Riscaldamento</li>
+                    <li>+ Condizionamento</li>
+                </ul>
+            </div>
+
+            <div class="bg-[#0B253C] p-10 hover:bg-[#0e2e4a] transition duration-300 hover-trigger group relative overflow-hidden">
+                <div class="absolute top-0 right-0 p-2">
+                    <div class="w-2 h-2 bg-red-500 rounded-full animate-ping"></div>
+                </div>
+                <span class="font-mono text-red-400 text-sm mb-4 block">URGENZE</span>
+                <h3 class="text-2xl font-bold mb-4 group-hover:translate-x-2 transition-transform">Pronto Intervento</h3>
+                <p class="text-gray-400 text-sm leading-relaxed">
+                    Squadra rapida per perdite d'acqua, guasti elettrici o danni strutturali urgenti. Interveniamo per limitare i danni.
+                </p>
+                <a href="tel:3209609181" class="mt-6 inline-block border-b border-red-400 text-red-400 pb-1 text-xs font-mono uppercase hover:text-white transition">Chiama Ora →</a>
+            </div>
+        </div>
+    </section>
+
+    <section id="lavori" class="py-32 relative">
+        <div class="px-6 md:px-20 mb-10 flex flex-col md:flex-row justify-between items-end">
+            <div>
+                <h2 class="text-4xl md:text-6xl font-bold mb-2">La Trasformazione</h2>
+                <p class="font-mono text-asm-accent text-sm">/// SWIPE TO REVEAL</p>
+            </div>
+        </div>
+
+        <div class="w-full h-[70vh] relative overflow-hidden group hover-trigger select-none" id="ba-slider">
+            <img src="https://images.unsplash.com/photo-1504307651254-35680f356dfd?q=80&w=2070&auto=format&fit=crop" class="absolute w-full h-full object-cover grayscale contrast-125" alt="Cantiere">
+            <div class="absolute top-10 left-10 bg-black/70 px-3 py-1 text-xs font-mono uppercase text-white">Fase: Cantiere</div>
+
+            <div class="absolute top-0 left-0 w-full h-full overflow-hidden" id="ba-foreground" style="clip-path: inset(0 50% 0 0);">
+                <img src="https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?q=80&w=2053&auto=format&fit=crop" class="w-full h-full object-cover" style="width: 100vw; max-width: none;" alt="Finito">
+                <div class="absolute top-10 right-10 bg-asm-accent px-3 py-1 text-xs font-mono uppercase text-black font-bold">Fase: Consegna</div>
+            </div>
+
+            <div class="absolute top-0 bottom-0 w-1 bg-white cursor-ew-resize z-20" id="ba-handle" style="left: 50%;">
+                <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-12 h-12 bg-[#0B253C] border-2 border-white rounded-full flex items-center justify-center text-white shadow-[0_0_20px_rgba(255,255,255,0.5)]">
+                    <i class="fas fa-arrows-left-right text-xs"></i>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="py-20 px-6 md:px-20 border-b border-white/10">
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-10 text-center md:text-left">
+            <div>
+                <h4 class="text-5xl font-bold text-asm-accent mb-2 counter" data-target="15">0</h4>
+                <p class="font-mono text-xs text-gray-500 uppercase">Anni di Esperienza</p>
+            </div>
+            <div>
+                <h4 class="text-5xl font-bold text-white mb-2 counter" data-target="320">0</h4>
+                <p class="font-mono text-xs text-gray-500 uppercase">Progetti Conclusi</p>
+            </div>
+            <div>
+                <h4 class="text-5xl font-bold text-white mb-2 counter" data-target="100">0%</h4>
+                <p class="font-mono text-xs text-gray-500 uppercase">Clienti Soddisfatti</p>
+            </div>
+            <div>
+                <h4 class="text-5xl font-bold text-white mb-2">24/7</h4>
+                <p class="font-mono text-xs text-gray-500 uppercase">Reperibilità</p>
+            </div>
+        </div>
+    </section>
+
+    <footer id="contatti" class="bg-black pt-20 pb-10 px-6 md:px-20 relative overflow-hidden">
+        <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div>
+        
+        <div class="relative z-10 grid grid-cols-1 md:grid-cols-2 gap-16 mb-20">
+            <div>
+                <span class="text-asm-accent font-mono text-xs mb-6 block">PARLIAMO DEL TUO PROGETTO</span>
+                <h2 class="text-5xl font-bold leading-tight mb-8">Hai una visione? <br>Costruiamola.</h2>
+                <div class="flex flex-col gap-4">
+                    <a href="mailto:info@asmedilizia.it" class="hover-trigger text-xl text-gray-400 hover:text-white transition">info@asmedilizia.it</a>
+                    <p class="text-gray-500 max-w-xs text-sm">Operiamo su Roma e provincia. Disponibili per sopralluoghi gratuiti.</p>
+                </div>
+            </div>
+            <div class="flex flex-col justify-center md:items-end">
+                <a href="tel:3209609181" class="hover-trigger bg-white text-black px-10 py-6 rounded-sm text-2xl font-bold hover:bg-asm-accent transition duration-300 flex items-center gap-4 shadow-[0_0_30px_rgba(255,255,255,0.1)]">
+                    <i class="fas fa-phone"></i>
+                    320 960 9181
+                </a>
+            </div>
+        </div>
+
+        <div class="relative z-10 border-t border-white/10 pt-8 flex flex-col md:flex-row justify-between text-xs font-mono text-gray-600">
+            <p>&copy; 2025 A.S.M. EDILIZIA. P.IVA: 16334561004</p>
+            <div class="flex gap-4 mt-4 md:mt-0">
+                <a href="#" class="hover:text-white">Privacy</a>
+                <a href="#" class="hover:text-white">Cookie Policy</a>
+            </div>
+        </div>
+    </footer>
+
+    <button onclick="toggleChat()" class="fixed bottom-8 right-8 w-14 h-14 bg-asm-accent rounded-full flex items-center justify-center z-50 shadow-[0_0_20px_rgba(56,189,248,0.5)] hover:scale-110 transition duration-300 hover-trigger text-[#0B253C]">
+        <i class="fas fa-robot text-2xl"></i>
+    </button>
+
+    <div id="chat-window" class="fixed bottom-24 right-8 w-80 md:w-96 bg-[#0f1f2e]/95 border border-white/10 rounded-xl chat-container overflow-hidden z-50 transform translate-y-[120%] opacity-0 transition-all duration-500 flex flex-col">
+        <div class="bg-[#0B253C] p-4 border-b border-white/10 flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                <div>
+                    <h4 class="text-sm font-bold text-white">A.S.M. Assistant</h4>
+                    <p class="text-[10px] text-gray-400 font-mono uppercase">AI Powered</p>
+                </div>
+            </div>
+            <button onclick="toggleChat()" class="text-gray-400 hover:text-white"><i class="fas fa-times"></i></button>
+        </div>
+
+        <div id="chat-messages" class="h-80 overflow-y-auto p-4 flex flex-col gap-3">
+            <div class="self-start bg-white/10 p-3 rounded-tr-lg rounded-br-lg rounded-bl-lg max-w-[85%] text-sm text-gray-200 border border-white/5">
+                Ciao! Sono l'assistente virtuale di A.S.M. Edilizia. 🏗️<br>Posso aiutarti con preventivi, informazioni sui servizi o emergenze. Dimmi pure.
+            </div>
+        </div>
+
+        <div class="p-4 border-t border-white/10 bg-[#0B253C]">
+            <form id="chat-form" class="flex gap-2" onsubmit="handleChat(event)">
+                <input type="text" id="chat-input" placeholder="Scrivi qui..." class="flex-1 bg-black/30 border border-white/10 rounded px-3 py-2 text-sm text-white focus:outline-none focus:border-asm-accent font-mono">
+                <button type="submit" class="bg-asm-accent text-[#0B253C] px-3 py-2 rounded hover:bg-white transition">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/studio-freight/lenis@1.0.29/bundled/lenis.min.js"></script>
+
+    <script>
+        // --- 1. SMOOTH SCROLL SETUP ---
+        const lenis = new Lenis({ duration: 1.2, easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)) });
+        function raf(time) { lenis.raf(time); requestAnimationFrame(raf); }
+        requestAnimationFrame(raf);
+
+        // --- 2. CURSOR FIX (GSAP QuickTo) ---
+        const cursor = document.getElementById('cursor');
+        const xTo = gsap.quickTo(cursor, "x", {duration: 0.1, ease: "power3"});
+        const yTo = gsap.quickTo(cursor, "y", {duration: 0.1, ease: "power3"});
+
+        window.addEventListener('mousemove', (e) => {
+            xTo(e.clientX);
+            yTo(e.clientY);
+        });
+
+        // Hover effect sugli elementi interattivi
+        document.querySelectorAll('.hover-trigger, a, button, input').forEach(el => {
+            el.addEventListener('mouseenter', () => cursor.classList.add('scale-[3]', 'bg-transparent', 'border', 'border-white'));
+            el.addEventListener('mouseleave', () => cursor.classList.remove('scale-[3]', 'bg-transparent', 'border', 'border-white'));
+        });
+
+        // --- 3. ANIMAZIONI SCROLL (GSAP) ---
+        gsap.registerPlugin(ScrollTrigger);
+        
+        // Reveal Text Hero
+        gsap.utils.toArray('.reveal-text').forEach((text, i) => {
+            gsap.fromTo(text, 
+                { y: 50, opacity: 0 },
+                { y: 0, opacity: 1, duration: 1.5, delay: 0.2 * i, ease: "power4.out" }
+            );
+        });
+
+        // Contatori Numeri
+        gsap.utils.toArray('.counter').forEach(counter => {
+            const target = +counter.getAttribute('data-target');
+            ScrollTrigger.create({
+                trigger: counter,
+                start: "top 85%",
+                once: true,
+                onEnter: () => {
+                    gsap.to(counter, {
+                        innerText: target,
+                        duration: 2,
+                        snap: { innerText: 1 },
+                        onUpdate: function() {
+                            counter.innerText = Math.ceil(this.targets()[0].innerText) + (counter.innerText.includes('%') ? '%' : '');
+                        }
+                    });
+                }
+            });
+        });
+
+        // --- 4. BEFORE / AFTER SLIDER ---
+        const slider = document.getElementById('ba-slider');
+        const foreground = document.getElementById('ba-foreground');
+        const handle = document.getElementById('ba-handle');
+
+        function moveSlider(e) {
+            const rect = slider.getBoundingClientRect();
+            let clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            let percent = ((clientX - rect.left) / rect.width) * 100;
+            percent = Math.max(0, Math.min(100, percent));
+            
+            foreground.style.clipPath = `inset(0 ${100 - percent}% 0 0)`;
+            handle.style.left = `${percent}%`;
+        }
+
+        slider.addEventListener('mousemove', moveSlider);
+        slider.addEventListener('touchmove', moveSlider);
+
+        // --- 5. CHATBOT LOGIC (AI SIMULATA) ---
+        let isChatOpen = false;
+        const chatWindow = document.getElementById('chat-window');
+        const messagesContainer = document.getElementById('chat-messages');
+
+        function toggleChat() {
+            isChatOpen = !isChatOpen;
+            if (isChatOpen) {
+                chatWindow.classList.remove('translate-y-[120%]', 'opacity-0');
+            } else {
+                chatWindow.classList.add('translate-y-[120%]', 'opacity-0');
+            }
+        }
+
+        async function handleChat(e) {
+            e.preventDefault();
+            const input = document.getElementById('chat-input');
+            const userText = input.value.trim();
+            if (!userText) return;
+
+            // 1. Aggiungi messaggio utente
+            addMessage(userText, 'user');
+            input.value = '';
+
+            // 2. Mostra "sta scrivendo..."
+            const loadingId = addLoading();
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+
+            // 3. Simula ritardo AI
+            setTimeout(() => {
+                removeMessage(loadingId);
+                const reply = generateResponse(userText);
+                addMessage(reply, 'bot');
+            }, 1500);
+        }
+
+        function addMessage(text, sender) {
+            const div = document.createElement('div');
+            div.className = `message-enter p-3 rounded-lg max-w-[85%] text-sm ${sender === 'user' 
+                ? 'self-end bg-asm-accent text-[#0B253C] rounded-br-none font-bold' 
+                : 'self-start bg-white/10 text-gray-200 rounded-bl-none border border-white/5'}`;
+            div.innerHTML = text;
+            messagesContainer.appendChild(div);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        function addLoading() {
+            const id = 'loading-' + Date.now();
+            const div = document.createElement('div');
+            div.id = id;
+            div.className = 'self-start bg-white/10 p-3 rounded-lg text-xs text-gray-400 flex gap-1 items-center';
+            div.innerHTML = '<span class="animate-bounce">●</span><span class="animate-bounce" style="animation-delay:0.1s">●</span><span class="animate-bounce" style="animation-delay:0.2s">●</span>';
+            messagesContainer.appendChild(div);
+            return id;
+        }
+
+        function removeMessage(id) {
+            const el = document.getElementById(id);
+            if (el) el.remove();
+        }
+
+        // LOGICA BOT (Qui puoi collegare vere API in futuro)
+        function generateResponse(text) {
+            text = text.toLowerCase();
+
+            // Logica locale basata su parole chiave
+            if (text.includes('prezzo') || text.includes('costo') || text.includes('preventivo')) {
+                return "Per un preventivo preciso abbiamo bisogno di un sopralluogo gratuito. Puoi chiamarci al <b>320 960 9181</b> o lasciarci un recapito qui.";
+            }
+            if (text.includes('idraulic') || text.includes('perdita') || text.includes('acqua')) {
+                return "Per le urgenze idrauliche siamo operativi h24. Se è un'emergenza, chiama subito il pulsante verde in alto!";
+            }
+            if (text.includes('bagno') || text.includes('cucina')) {
+                return "Siamo specializzati in ristrutturazioni di bagni e cucine chiavi in mano. Ci occupiamo di tutto: demolizione, impianti e posa.";
+            }
+            if (text.includes('ciao') || text.includes('salve')) {
+                return "Ciao! Come posso esserti utile per la tua casa oggi?";
+            }
+            if (text.includes('dove') || text.includes('zona')) {
+                return "Operiamo principalmente a Roma e provincia, ma valutiamo progetti in tutto il Lazio.";
+            }
+            
+            // Fallback generico
+            return "Grazie per la domanda. Per darti una risposta tecnica precisa, preferisco farti parlare con un nostro geometra. Chiama il 320 960 9181.";
+            
+            /* --- SEZIONE API REALE (Opzionale per il futuro) ---
+            Se volessi usare OpenAI, dovresti sostituire questa funzione con una fetch() 
+            al tuo server backend (non mettere mai la API KEY qui nel frontend).
+            */
+        }
+
+        // Animazione Marquee Tailwind
+        tailwind.config.theme.extend.keyframes = {
+            ...tailwind.config.theme.extend.keyframes,
+            marquee: {
+                '0%': { transform: 'translateX(0%)' },
+                '100%': { transform: 'translateX(-50%)' },
+            }
+        };
+        tailwind.config.theme.extend.animation = {
+            ...tailwind.config.theme.extend.animation,
+            marquee: 'marquee 30s linear infinite',
+        };
+    </script>
+</body>
+</html>
